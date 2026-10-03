@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: ecommerce
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: product-service
+
+  template:
+    metadata:
+      labels:
+        app: product-service
+
+    spec:
+      containers:
+        - name: product-service
+          image: ecommerce/product-service:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8002
+
+          env:
+            - name: PORT
+              value: "8002"
+
+            - name: STORAGE_SERVICE_URL
+              value: "http://storage-service:8004"

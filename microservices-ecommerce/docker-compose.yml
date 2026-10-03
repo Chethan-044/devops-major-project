@@ -1,0 +1,79 @@
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: ecommerce-postgres
+    environment:
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: ecommerce_storage
+      POSTGRES_PASSWORD: storage_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  storage-service:
+    build:
+      context: ./storage-service
+    container_name: ecommerce-storage-service
+    environment:
+      PORT: 8004
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ecommerce_db
+      DB_USER: ecommerce_storage
+      DB_PASSWORD: storage_password
+    ports:
+      - "8004:8004"
+    depends_on:
+      - postgres
+
+  user-service:
+    build:
+      context: ./user-service
+    container_name: ecommerce-user-service
+    environment:
+      PORT: 8001
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+
+  product-service:
+    build:
+      context: ./product-service
+    container_name: ecommerce-product-service
+    environment:
+      PORT: 8002
+    ports:
+      - "8002:8002"
+
+  order-service:
+    build:
+      context: ./order-service
+    container_name: ecommerce-order-service
+    environment:
+      SERVER_PORT: 8003
+      USER_SERVICE_URL: http://user-service:8001
+      PRODUCT_SERVICE_URL: http://product-service:8002
+      STORAGE_SERVICE_URL: http://storage-service:8004
+    ports:
+      - "8003:8003"
+    depends_on:
+      - user-service
+      - product-service
+      - storage-service
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ecommerce-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+
+volumes:
+  postgres-data:

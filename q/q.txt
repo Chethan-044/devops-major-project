@@ -1,0 +1,6 @@
+
+"Why did you use a multi-stage Docker build for your Go application?"
+Your answer:
+"Go applications are compiled into a binary, so I don't need the Go compiler or source code at runtime. I use one stage containing the Go build environment to compile the application and a separate lightweight runtime stage containing only the compiled binary. This reduces the final image size and attack surface. I also run the application as a non-root user."
+
+
